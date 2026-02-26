@@ -46,24 +46,33 @@ void setRightMotors(double speed)
 
 void stopAllMotors()
 {
-    LeftMotor1.stop();
-    LeftMotor2.stop();
-    LeftMotor3.stop();
-    LeftMotor4.stop();
-    RightMotor1.stop();
-    RightMotor2.stop();
-    RightMotor3.stop();
-    RightMotor4.stop();
+    LeftMotor1.stop(brakeType::brake);
+    LeftMotor2.stop(brakeType::brake);
+    LeftMotor3.stop(brakeType::brake);
+    LeftMotor4.stop(brakeType::brake);
+    RightMotor1.stop(brakeType::brake);
+    RightMotor2.stop(brakeType::brake);
+    RightMotor3.stop(brakeType::brake);
+    RightMotor4.stop(brakeType::brake);
 }
 
 void stopRecoleccion()
 {
-    Recoleccion.stop();
+    Recoleccion.stop(brakeType::brake);
 }
 
 void recoleccionSubir(int speed, double duration)
 {
-    Recoleccion.spin(directionType::rev, 100, velocityUnits::pct);
+    Recoleccion.spin(directionType::rev, speed, velocityUnits::pct);
+    wait(duration, seconds);
+    stopRecoleccion();
+}
+
+void recoleccionSubirSinTirar(int speed, double duration)
+{
+    Recolector1.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector2.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
     wait(duration, seconds);
     stopRecoleccion();
 }
@@ -71,6 +80,20 @@ void recoleccionSubir(int speed, double duration)
 void recoleccionSubirStart(int speed)
 {
     Recoleccion.spin(directionType::rev, speed, velocityUnits::pct);
+}
+
+void recoleccionSubirSinTirarStart(int speed)
+{
+    Recolector1.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector2.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
+}
+
+void recoleccionSubirSacarAdelanteStart(int speed)
+{
+    Recolector1.spin(directionType::fwd, speed, velocityUnits::pct);
+    Recolector2.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
 }
 
 void recoleccionBajar(int speed, double duration)
@@ -82,183 +105,201 @@ void recoleccionBajar(int speed, double duration)
 
 void recoleccionAlmacenar(int speed, double duration)
 {
-    Recolector1.spin(directionType::rev, 100, velocityUnits::pct);
-    Recolector2.spin(directionType::rev, 100, velocityUnits::pct);
-    Recolector5.spin(directionType::fwd, 100, velocityUnits::pct);
+    Recolector1.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector2.spin(directionType::rev, speed, velocityUnits::pct);
+    Recolector5.spin(directionType::fwd, speed, velocityUnits::pct);
     wait(duration, seconds);
     stopRecoleccion();
 }
 
 void recoleccionBajito(int speed, double duration)
 {
-    Recolector1.spin(directionType::fwd, 100, velocityUnits::pct);
-    Recolector2.spin(directionType::rev, 100, velocityUnits::pct);
+    Recolector1.spin(directionType::fwd, speed, velocityUnits::pct);
+    Recolector2.spin(directionType::rev, speed, velocityUnits::pct);
     Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
-    Recolector5.spin(directionType::fwd, 100, velocityUnits::pct);
+    Recolector5.spin(directionType::fwd, speed, velocityUnits::pct);
     wait(duration, seconds);
     stopRecoleccion();
 }
-void moveDistance(double distanceInInches, double maxSpeed)
+
+void moveDistance(double distanceInInches, double speed)
 {
+    wait(100, msec); // Espera breve para asegurar que se reinicie
     resetEncoders();
+    inertialSensor.resetRotation(); // Asegúrate de que el sensor esté calibrado antes de llamar esto
 
-    double targetDegrees = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360.0;
-    double targetAbs = fabs(targetDegrees);
-    double sign = (targetDegrees >= 0) ? 1.0 : -1.0;
+    // Compensar error de distancia si es necesario
+    distanceInInches = (1.0 - RELATIVE_DISTANCE_ERROR) * distanceInInches;
 
-    Brain.Screen.clearScreen();
-    Brain.Screen.setCursor(1, 1);
-    Brain.Screen.print("Target deg: %.2f", targetDegrees);
+    //double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
 
-    // Fracción para comenzar a frenar (18% del recorrido)
-    double decelFraction = 0.18;
-    double decelStart = targetAbs * decelFraction;
+    double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
+    
+    double initialAngle = inertialSensor.rotation(); // Ángulo inicial
+    double kP = 0.5;                                 // Constante proporcional, puedes ajustar esto
 
-    // Mínimo para distancias muy pequeñas
-    if (decelStart < 40)
-        decelStart = 40;
-
-    while (true)
+    while (fabs(LeftMotor1.position(rotationUnits::deg)) < targetRotations && fabs(RightMotor1.position(rotationUnits::deg)) < targetRotations)
     {
-        double leftPos = (
-            LeftMotor1.position(deg) +
-            LeftMotor2.position(deg) +
-            LeftMotor3.position(deg) +
-            LeftMotor4.position(deg)
-        ) / 4.0;
 
-        double rightPos = (
-            RightMotor1.position(deg) +
-            RightMotor2.position(deg) +
-            RightMotor3.position(deg) +
-            RightMotor4.position(deg)
-        ) / 4.0;
+        double currentAngle = inertialSensor.rotation();
+        double error = currentAngle - initialAngle; // Positivo = desviado a la derecha
 
-        double avgPos = (leftPos + rightPos) / 2.0; // signed
-        double error = targetDegrees - avgPos;
-        double remaining = fabs(error);
+        double correction = error * kP;
 
-        if (remaining <= 2.0)  // tolerancia pequeña
-            break;
+        // Ajuste de velocidad con corrección
+        double leftSpeed = speed - correction;
+        double rightSpeed = speed + correction;
 
-        double currentSpeed = maxSpeed;
+        // Limitar velocidades si es necesario
+        leftSpeed = std::max(std::min(leftSpeed, 100.0), -100.0);
+        rightSpeed = std::max(std::min(rightSpeed, 100.0), -100.0);
 
-        // Dsesaceleración proporcional al error restante
-        if (remaining < decelStart)
-        {
-            double scale = remaining / decelStart;
-            currentSpeed = maxSpeed * scale;
+        setLeftMotors(leftSpeed);
+        setRightMotors(rightSpeed);
 
-            if (currentSpeed < 8)  // velocidad mínima baja
-                currentSpeed = 8;
-        }
-
-        currentSpeed *= sign;
-
-        setLeftMotors(currentSpeed);
-        setRightMotors(currentSpeed);
-
-        task::sleep(10);
+        task::sleep(10); // Pequeña pausa para evitar sobrecarga del CPU
     }
 
     stopAllMotors();
-
-    double finalLeft = (
-        LeftMotor1.position(deg) +
-        LeftMotor2.position(deg) +
-        LeftMotor3.position(deg) +
-        LeftMotor4.position(deg)
-    ) / 4.0;
-
-    double finalRight = (
-        RightMotor1.position(deg) +
-        RightMotor2.position(deg) +
-        RightMotor3.position(deg) +
-        RightMotor4.position(deg)
-    ) / 4.0;
-
-    double finalAvg = (finalLeft + finalRight) / 2.0;
-    double finalError = targetDegrees - finalAvg;
-
-    Brain.Screen.newLine();
-    Brain.Screen.print("Final deg: %.2f", finalAvg);
-
-    Brain.Screen.newLine();
-    Brain.Screen.print("Error deg: %.2f", finalError);
+    wait(100, msec); // Espera breve para asegurar que se reinicie
 }
 
-void moveDistanceConRecoleccion(double distanceInInches, double maxSpeed, int recoSpeed)
+void moveDistanceConRecoleccion(double distanceInInches, double speed, int recoSpeed)
 {
     resetEncoders();
 
-    // Activar recolección mientras se mueve
+    // Activar recoleccion antes de empezar a moverse
     recoleccionSubirStart(recoSpeed);
 
+    wait(100, msec); // Espera breve para asegurar que se reinicie
     resetEncoders();
+    inertialSensor.resetRotation(); // Asegúrate de que el sensor esté calibrado antes de llamar esto
 
-    double targetDegrees = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360.0;
-    double targetAbs = fabs(targetDegrees);
-    double sign = (targetDegrees >= 0) ? 1.0 : -1.0;
+    // Compensar error de distancia si es necesario
+    distanceInInches = (1.0 - RELATIVE_DISTANCE_ERROR) * distanceInInches;
 
-    Brain.Screen.clearScreen();
-    Brain.Screen.setCursor(1, 1);
-    Brain.Screen.print("Target deg: %.2f", targetDegrees);
+    //double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
 
-    // Fracción para comenzar a frenar (18% del recorrido)
-    double decelFraction = 0.18;
-    double decelStart = targetAbs * decelFraction;
+    double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
+    
+    double initialAngle = inertialSensor.rotation(); // Ángulo inicial
+    double kP = 0.5;                                 // Constante proporcional, puedes ajustar esto
 
-    // Mínimo para distancias muy pequeñas
-    if (decelStart < 40)
-        decelStart = 40;
-
-    while (true)
+    while (fabs(LeftMotor1.position(rotationUnits::deg)) < targetRotations && fabs(RightMotor1.position(rotationUnits::deg)) < targetRotations)
     {
-        double leftPos = (
-            LeftMotor1.position(deg) +
-            LeftMotor2.position(deg) +
-            LeftMotor3.position(deg) +
-            LeftMotor4.position(deg)
-        ) / 4.0;
 
-        double rightPos = (
-            RightMotor1.position(deg) +
-            RightMotor2.position(deg) +
-            RightMotor3.position(deg) +
-            RightMotor4.position(deg)
-        ) / 4.0;
+        double currentAngle = inertialSensor.rotation();
+        double error = currentAngle - initialAngle; // Positivo = desviado a la derecha
 
-        double avgPos = (leftPos + rightPos) / 2.0; // signed
-        double error = targetDegrees - avgPos;
-        double remaining = fabs(error);
+        double correction = error * kP;
 
-        if (remaining <= 2.0)  // tolerancia pequeña
-            break;
+        // Ajuste de velocidad con corrección
+        double leftSpeed = speed - correction;
+        double rightSpeed = speed + correction;
 
-        double currentSpeed = maxSpeed;
+        // Limitar velocidades si es necesario
+        leftSpeed = std::max(std::min(leftSpeed, 100.0), -100.0);
+        rightSpeed = std::max(std::min(rightSpeed, 100.0), -100.0);
 
-        // Dsesaceleración proporcional al error restante
-        if (remaining < decelStart)
-        {
-            double scale = remaining / decelStart;
-            currentSpeed = maxSpeed * scale;
+        setLeftMotors(leftSpeed);
+        setRightMotors(rightSpeed);
 
-            if (currentSpeed < 8)  // velocidad mínima baja
-                currentSpeed = 8;
-        }
-
-        currentSpeed *= sign;
-
-        setLeftMotors(currentSpeed);
-        setRightMotors(currentSpeed);
-
-        task::sleep(10);
+        task::sleep(10); // Pequeña pausa para evitar sobrecarga del CPU
     }
 
     stopAllMotors();
+    wait(100, msec); // Espera breve para asegurar que se reinicie
+}
 
-    // Apagar recolección al terminar
-    stopRecoleccion();
+void moveDistanceConRecoleccionSinTirar(double distanceInInches, double speed, int recoSpeed)
+{
+    resetEncoders();
+
+    // Activar recoleccion antes de empezar a moverse
+    recoleccionSubirSinTirarStart(recoSpeed);
+
+    wait(100, msec); // Espera breve para asegurar que se reinicie
+    resetEncoders();
+    inertialSensor.resetRotation(); // Asegúrate de que el sensor esté calibrado antes de llamar esto
+
+    // Compensar error de distancia si es necesario
+    distanceInInches = (1.0 - RELATIVE_DISTANCE_ERROR) * distanceInInches;
+
+    double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
+    
+    double initialAngle = inertialSensor.rotation(); // Ángulo inicial
+    double kP = 0.5;                                 // Constante proporcional, puedes ajustar esto
+
+    while (fabs(LeftMotor1.position(rotationUnits::deg)) < targetRotations && fabs(RightMotor1.position(rotationUnits::deg)) < targetRotations)
+    {
+
+        double currentAngle = inertialSensor.rotation();
+        double error = currentAngle - initialAngle; // Positivo = desviado a la derecha
+
+        double correction = error * kP;
+
+        // Ajuste de velocidad con corrección
+        double leftSpeed = speed - correction;
+        double rightSpeed = speed + correction;
+
+        // Limitar velocidades si es necesario
+        leftSpeed = std::max(std::min(leftSpeed, 100.0), -100.0);
+        rightSpeed = std::max(std::min(rightSpeed, 100.0), -100.0);
+
+        setLeftMotors(leftSpeed);
+        setRightMotors(rightSpeed);
+
+        task::sleep(10); // Pequeña pausa para evitar sobrecarga del CPU
+    }
+
+    stopAllMotors();
+    wait(100, msec); // Espera breve para asegurar que se reinicie
+}
+
+
+void moveDistanceConRecoleccionSacarAdelante(double distanceInInches, double speed, int recoSpeed)
+{
+    resetEncoders();
+
+    // Activar recoleccion antes de empezar a moverse
+    recoleccionSubirSacarAdelanteStart(recoSpeed);
+
+    wait(100, msec); // Espera breve para asegurar que se reinicie
+    resetEncoders();
+    inertialSensor.resetRotation(); // Asegúrate de que el sensor esté calibrado antes de llamar esto
+
+    // Compensar error de distancia si es necesario
+    distanceInInches = (1.0 - RELATIVE_DISTANCE_ERROR) * distanceInInches;
+
+    double targetRotations = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360;
+    
+    double initialAngle = inertialSensor.rotation(); // Ángulo inicial
+    double kP = 0.5;                                 // Constante proporcional, puedes ajustar esto
+
+    while (fabs(LeftMotor1.position(rotationUnits::deg)) < targetRotations && fabs(RightMotor1.position(rotationUnits::deg)) < targetRotations)
+    {
+
+        double currentAngle = inertialSensor.rotation();
+        double error = currentAngle - initialAngle; // Positivo = desviado a la derecha
+
+        double correction = error * kP;
+
+        // Ajuste de velocidad con corrección
+        double leftSpeed = speed - correction;
+        double rightSpeed = speed + correction;
+
+        // Limitar velocidades si es necesario
+        leftSpeed = std::max(std::min(leftSpeed, 100.0), -100.0);
+        rightSpeed = std::max(std::min(rightSpeed, 100.0), -100.0);
+
+        setLeftMotors(leftSpeed);
+        setRightMotors(rightSpeed);
+
+        task::sleep(10); // Pequeña pausa para evitar sobrecarga del CPU
+    }
+
+    stopAllMotors();
+    wait(100, msec); // Espera breve para asegurar que se reinicie
 }
 
 double computerPID(PID &pid, double setpoint, double current, double dt)
@@ -282,16 +323,17 @@ void resetPID(PID &pid)
 void calibrateInertial()
 {
     inertialSensor.calibrate();
-    while (inertialSensor.isCalibrating())
-    {
+    while (inertialSensor.isCalibrating()){
         wait(100, msec);
     }
 }
 
 double normalizeAngle(double angle)
 {
-    while (angle > 180) angle -= 360;
-    while (angle < -180) angle += 360;
+    while (angle > 180)
+        angle -= 360;
+    while (angle < -180)
+        angle += 360;
     return angle;
 }
 
@@ -319,8 +361,10 @@ void rotateOnAxis(double targetAngle, double maxSpeed, PID &pid_t)
 
         pid_t.prevError = error;
 
-        if (power > maxSpeed) power = maxSpeed;
-        if (power < -maxSpeed) power = -maxSpeed;
+        if (power > maxSpeed)
+            power = maxSpeed;
+        if (power < -maxSpeed)
+            power = -maxSpeed;
 
         setLeftMotors(power);
         setRightMotors(-power);
@@ -331,7 +375,8 @@ void rotateOnAxis(double targetAngle, double maxSpeed, PID &pid_t)
     stopAllMotors();
     wait(100, msec);
 }
-void rotateOnAxisConRecoleccion(double targetAngle, double maxSpeed, PID &pid_t)
+
+void rotateOnAxisRecoleccion(double targetAngle, double maxSpeed, PID &pid_t)
 {
     resetPID(pid_t);
 
@@ -358,8 +403,10 @@ void rotateOnAxisConRecoleccion(double targetAngle, double maxSpeed, PID &pid_t)
 
         pid_t.prevError = error;
 
-        if (power > maxSpeed) power = maxSpeed;
-        if (power < -maxSpeed) power = -maxSpeed;
+        if (power > maxSpeed)
+            power = maxSpeed;
+        if (power < -maxSpeed)
+            power = -maxSpeed;
 
         setLeftMotors(power);
         setRightMotors(-power);
@@ -368,9 +415,5 @@ void rotateOnAxisConRecoleccion(double targetAngle, double maxSpeed, PID &pid_t)
     }
 
     stopAllMotors();
-
-    // Detenemos recolección al terminar
-    stopRecoleccion();
-
     wait(100, msec);
 }

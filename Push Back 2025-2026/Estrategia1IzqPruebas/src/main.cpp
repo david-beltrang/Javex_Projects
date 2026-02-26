@@ -40,9 +40,12 @@ motor Recolector3(PORT2, false);
 motor Recolector4(PORT13, true);
 motor Recolector5(PORT12, false);
 motor_group Recoleccion(Recolector1, Recolector2, Recolector3, Recolector4, Recolector5);
-vex::pneumatics BarraLoader(Brain.ThreeWirePort.A);
 
-bool pistonAbierto = false;
+vex::pneumatics BarraLoader(Brain.ThreeWirePort.A);
+vex::pneumatics BarraSacar(Brain.ThreeWirePort.B);
+
+bool pistonLoader = false;
+bool pistonSacar = true;
 
 // Var PID
 PID pid;
@@ -83,22 +86,54 @@ void autonomous(void)
 {
     // ..........................................................................
     calibrateInertial();
-    pid.kp = 0.6;
-    pid.kd = 0.2;
-    pid.ki = 0.001;
+    pid.kp = 1.3;
+    pid.kd = 0.28;
+    pid.ki = 0.15;
 
+    moveDistance(24, 90); // Mover hacia adelante 20 pulgadas a velocidad 80%
+    //rotateOnAxis(90, 80, pid);
+    /*rotateOnAxis(180, 70, pid);
+    moveDistance(12, -80); // Mover hacia adelante 20 pulgadas a velocidad 80%
+    rotateOnAxis(180, 70, pid);
+    moveDistance(12, 80); // Mover hacia adelante 20 pulgadas a velocidad 80%
+    */
     // PASO 1: Movimiento recto, girar y avanzar hacia el Loader
-    //moveDistance(5, 80); // Mover hacia adelante 14 pulgadas a velocidad 80%
-    rotateOnAxis(360, 80, pid); // Girar 90 grados a la derecha a velocidad 80%
-    //moveDistance(20, 80); // Mover hacia adelante 14 pulgadas a velocidad 80%
-    //moveDistanceConRecoleccion(6, 50, 100); // Subir recolección durante 3 segundos a velocidad 100%
-    //rotateOnAxisConRecoleccion(-55, 80, pid); // Girar
-    /*
-    moveDistance(32, 80); // Mover hacia adelante 14 pulgadas a velocidad 80%
-    moveDistanceConRecoleccion(6, 50, 100); // Subir recolección durante 3 segundos a velocidad 100%
-    rotateOnAxisConRecoleccion(-65, 80, pid); // Girar 90 grados a la derecha a velocidad 80%
-    moveDistanceConRecoleccion(4, 40, 100); // Subir recolección durante 3 segundos a velocidad 100%
-*/
+    /*moveDistance(55, 80); // Mover hacia adelante 14 pulgadas a velocidad 80%
+    rotateOnAxis(-90, 80, pid); // Girar 90 grados a la derecha a velocidad 80%
+
+    // PASO 2: Se drige al Loader y se activa el mecanismo de recolección para obtener los 3 primeros bloques
+    moveDistance(8, 80); // Mover hacia adelante 10 pulgadas a velocidad 80%
+    recoleccionSubir(100, 3); // Activar recolección durante 3 segundos a velocidad 100%
+
+    // PASO 3: Retroceder hacia el Goal y poner los 4 bloques
+    moveDistance(16, -80); // Mover hacia atras 20 pulgadas a velocidad 80%
+    wait(3000, msec); // Espera breve para asegurar que se reinicie
+
+    // PASO 4: Se dirige al Loader y obtiene los 3 bloques de la otra alizanza
+    moveDistance(16, 80); // Mover hacia adelante 20 pulgadas a velocidad 80%
+    wait(3000, msec); // Espera breve para asegurar que se reinicie
+
+    // PASO 5: Retroceder y girar para lanzar los 3 bloques
+    moveDistance(8, -80); // Mover hacia atras 10 pulgadas a velocidad 80%
+    rotateOnAxis(-120, 80, pid); // Girar 45 grados a la izquierda a velocidad 80%
+    wait(3000, msec); // Espera
+
+    // PASO 6: Volver a alinear y avanzar hacia el Loader para obtener los 6 bloques
+    rotateOnAxis(-90, 80, pid); // Girar 45 grados a la derecha a velocidad 80%
+    moveDistance(8, 80); // Mover hacia adelante 10 pulgadas a velocidad 80%
+    wait(3000, msec); // Espera
+
+    // PASO 7: Retroceder hacia el Goal y poner los 6 bloques
+    moveDistance(16, -80); // Mover hacia atras 20 pulgadas a velocidad 80%
+    wait(3000, msec); // Espera
+
+    // PASO 8: Retroceder y girar 
+    moveDistance(8, 80); // Mover hacia atras 10 pulgadas a velocidad 80%
+    rotateOnAxis(0, 80, pid); // Girar 90 grados a la izquierda a velocidad 80%
+    moveDistance(40, -80); // Mover hacia atras 10 pulgadas a velocidad 80%
+    rotateOnAxis(90, 80, pid); // Girar 90 grados a la izquierda a velocidad 80%
+    moveDistance(10, 80); // Mover hacia atras 10 pulgadas a velocidad 80%
+    */
 }
 
 /*---------------------------------------------------------------------------*/
@@ -119,26 +154,27 @@ void usercontrol(void)
         twoJoysticksControl();
         // Control del motor recolector y rampa usando L1 y L2
         // Mover recoleccion completa para recolectar
-        if (Controller.ButtonL1.pressing())
+        if (Controller.ButtonL2.pressing())
         {
             Recoleccion.spin(directionType::rev, 100, velocityUnits::pct);
             // Mover recoleccion completa para devolver
         }
-        else if (Controller.ButtonL2.pressing())
+        else if (Controller.ButtonL1.pressing())
         {
             Recoleccion.spin(directionType::fwd, 100, velocityUnits::pct);
         }
-        // Mover recoleccion para almacenar
+        // Mover recoleccion para Goal bajito
         else if (Controller.ButtonR1.pressing())
         {
-            Recolector1.spin(directionType::rev, 100, velocityUnits::pct);
+            Recolector1.spin(directionType::fwd, 100, velocityUnits::pct);
             Recolector2.spin(directionType::rev, 100, velocityUnits::pct);
+            Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
             Recolector5.spin(directionType::fwd, 100, velocityUnits::pct);
         }
-        // Mover recoleccion para Goal bajito
+        // Mover recoleccion para almacenar
         else if (Controller.ButtonR2.pressing())
         {
-            Recolector1.spin(directionType::fwd, 100, velocityUnits::pct);
+            Recolector1.spin(directionType::rev, 100, velocityUnits::pct);
             Recolector2.spin(directionType::rev, 100, velocityUnits::pct);
             Recolector3.spin(directionType::rev, 100, velocityUnits::pct);
             Recolector5.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -148,25 +184,41 @@ void usercontrol(void)
             Recoleccion.stop(brakeType::hold);
         }
 
-        if (Controller.ButtonA.pressing())
+        if (Controller.ButtonB.pressing())
         {
             // Esperamos a que el botón sea liberado para evitar múltiples activaciones en una sola pulsación
-            while (Controller.ButtonA.pressing())
-            {
+            while (Controller.ButtonB.pressing()){
                 // Espera a que el botón se suelte
             }
 
             // Cambiamos el estado del pistón
-            pistonAbierto = !pistonAbierto;
+            pistonLoader = !pistonLoader;
 
-            // Ejecutamos la acción correspondiente
-            if (pistonAbierto)
-            {
+            // Ejecutamos la acción correspondiente Abrir o Cerrar segun en que este
+            if (pistonLoader){
                 BarraLoader.open();
             }
-            else
-            {
+            else{
                 BarraLoader.close();
+            }
+        }
+
+        if (Controller.ButtonDown.pressing())
+        {
+            // Esperamos a que el botón sea liberado para evitar múltiples activaciones en una sola pulsación
+            while (Controller.ButtonDown.pressing()){
+                // Espera a que el botón se suelte
+            }
+
+            // Cambiamos el estado del pistón
+            pistonSacar = !pistonSacar;
+
+            // Ejecutamos la acción correspondiente Abrir o Cerrar segun en que este
+            if (pistonSacar){
+                BarraSacar.open();
+            }
+            else{
+                BarraSacar.close();
             }
         }
 
