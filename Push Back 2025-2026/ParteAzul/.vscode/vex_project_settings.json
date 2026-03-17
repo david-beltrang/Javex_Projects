@@ -1,0 +1,19 @@
+{
+	"extension": {
+		"version": "0.8.2026020401",
+		"json": 2
+	},
+	"project": {
+		"name": "ParteAzul",
+		"description": "",
+		"creationDate": "2/27/2026, 6:56:02 AM",
+		"platform": "V5",
+		"language": "cpp",
+		"slot": 2,
+		"sdkVersion": "V5_20240802_15_00_00",
+		"cpp": {
+			"includePath": [],
+			"printf_float": true
+		}
+	}
+}
