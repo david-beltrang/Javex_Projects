@@ -44,7 +44,7 @@ motor_group Recoleccion(Recolector1, Recolector2, Recolector3, Recolector4, Reco
 vex::pneumatics BarraSacar(Brain.ThreeWirePort.A);
 vex::pneumatics BarraLoader(Brain.ThreeWirePort.B);
 
-bool pistonLoader = false;
+bool pistonLoader = true;
 bool pistonSacar = true;
 
 // Var PID
@@ -84,53 +84,42 @@ void pre_auton(void)
 
 void autonomous(void)
 {
-    // ..........................................................................
-    calibrateInertial();
-    pid.kp = 0.6;
-    pid.kd = 0.2;
-    pid.ki = 0.001;
+    pid.kp = 0.7;
+    pid.kd = 0.25;
+    pid.ki = 0.0009;
 
-    
     // PASO 1: Movimiento recto, girar y avanzar hacia el Goal
-    moveDistance(24, 85); // Mover hacia adelante 14 pulgadas a velocidad 80%
-    rotateOnAxis(-92, 85, pid); // Girar 90 grados a la derecha velocidad 80%
-    moveDistance(18, -85); // Mover hacia atras 17 pulgadas a velocidad 80%
+    moveDistance(41, 9.5); // Mover hacia adelante 14 pulgadas a velocidad 80%
+    rotateOnAxis(-91 , 8.5, pid); // Girar 90 grados a la derecha velocidad 80%
+    moveDistance(19, -8.5); // Mover hacia atras 17 pulgadas a velocidad 80%
+
     // PASO 2: Poner el bloque y volver al Loader
     recoleccionSubir(100, 1.5); // Activar recolección durante 3 segundos a velocidad 100%
-    rotateOnAxis(-0.5, 50, pid); // Girar 90 grados a la izquierda a velocidad 60%
-    moveDistance(23, 70); // Mover hacia adelante 17 pulgadas a velocidad
-    moveDistance(5, 60); // Mover hacia adelante 3 pulgadas a velocidad 80%
+    moveDistance(2, 70);
+    // rotateOnAxis(6.2, 65, pid); // Girar 90 grados a la izquierda a velocidad 60%
+    moveDistance(23, 90); // Mover hacia adelante 17 pulgadas a velocidad
+    rotateOnAxis(-5, 85, pid); // Girar 90 grados a la izquierda a velocidad 80%
+
     // PASO 3: Recolectar los 3 bloques del Loader
     moveDistanceConRecoleccionSinTirar(7, 95, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSinTirar(0.5, -95, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSinTirar(1, 95, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSacarAdelante(0.5, -95, 60); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSacarAdelante(1, 95, 60); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    recoleccionSubirSinTirar(30, 3); // Activar recolección durante 3 segundos a velocidad 100%
+    moveDistanceConRecoleccionSinTirar(0.5, -85, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
+    moveDistanceConRecoleccionSinTirar(2, 95, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
+    moveDistanceConRecoleccionSinTirar(0.5, -90, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
+    moveDistanceConRecoleccionSinTirar(6, 85, 80); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
+    recoleccionSubirSinTirar(50, 6); // Activar recolección durante 3 segundos a velocidad 100%
+    
     // PASO 4: Volver al Goal y poner los bloques
-    moveDistance(7, -10); // Mover hacia atras 4 pulgadas a velocidad 30%
-    rotateOnAxis(-7.5, 65, pid); // Girar 90 grados a la izquierda a velocidad 80%
-    moveDistance(26, -80); // Mover hacia atras 14 pulgadas a velocidad 80%
-    moveDistance(2, -60); // Mover hacia adelante 3 pulgadas a velocidad 80%
-    recoleccionSubir(100, 4); // Activar recolección durante 2 segundos a velocidad 100%
-
+    moveDistance(50, -70); // Mover hacia atras 4 pulgadas a velocidad 30%
+    recoleccionSubir(90, 8); // Activar recolección durante 2 segundos a velocidad 100%
     /*
-    // PASO 1: Movimiento recto, girar y avanzar hacia el Loader
-    BarraLoader.open(); // Abrir el pistón para cargar
-    moveDistance(9.2, 17.5); // Mover hacia adelante 9.2 pulgadas a velocidad 80%
-    moveDistanceConRecoleccionSinTirar(9.2, 27, 90); // Mover hacia adelante 9.2 pulgadas a velocidad 27% con recolección activa
-    moveDistanceConRecoleccionSinTirar(3, 95, 90); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSinTirar(0.5, -95, 90); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSinTirar(1, 95, 90); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSacarAdelante(0.5, -95, 60); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    moveDistanceConRecoleccionSacarAdelante(1, 95, 60); // Mover hacia adelante 10 pulgadas a velocidad 80% con recolección activa
-    recoleccionSubirSinTirar(30, 3); // Activar recolección durante 3 segundos a velocidad 100%
-    recoleccionSubirSinTirar(10, 2); // Activar recolección durante 3 segundos a velocidad 100%
-    moveDistance(4, -10); // Mover hacia atras 4 pulgadas a velocidad 30%
-    moveDistance(28, -80); // Mover hacia atras 14 pulgadas a velocidad 80%
-    rotateOnAxis(-9, 55, pid); // Girar 90 grados a la izquierda a velocidad 80%
-    moveDistance(5, -80); // Mover hacia adelante 3 pulgadas a velocidad 80%
-    recoleccionSubir(100, 4); // Activar recolección durante 2 segundos a velocidad 100%
+    rotateOnAxis(-6, 60, pid); // Girar 90 grados a la izquierda a velocidad 80%
+    moveDistance(40, -80); // Mover hacia atras 14 pulgadas a velocidad 80%
+    recoleccionSubir(100, 2.5); // Activar recolección durante 2 segundos a velocidad 100%
+
+    // PASO 5: Retroceder para recolectar los 6 bloques de afuera
+    moveDistance(30, 80);
+    recoleccionSubir(100, 8);
+    moveDistance(30, -70);
 */
     }
 

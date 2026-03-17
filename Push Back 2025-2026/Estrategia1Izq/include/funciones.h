@@ -28,20 +28,20 @@ void resetEncoders()
     RightMotor4.setPosition(0, rotationUnits::deg);
 }
 
-void setLeftMotors(double speed)
+void setLeftMotorsVolt(double volt)
 {
-    LeftMotor1.spin(directionType::fwd, speed, velocityUnits::pct);
-    LeftMotor2.spin(directionType::fwd, speed, velocityUnits::pct);
-    LeftMotor3.spin(directionType::fwd, speed, velocityUnits::pct);
-    LeftMotor4.spin(directionType::fwd, speed, velocityUnits::pct);
+    LeftMotor1.spin(fwd, volt, voltageUnits::volt);
+    LeftMotor2.spin(fwd, volt, voltageUnits::volt);
+    LeftMotor3.spin(fwd, volt, voltageUnits::volt);
+    LeftMotor4.spin(fwd, volt, voltageUnits::volt);
 }
 
-void setRightMotors(double speed)
+void setRightMotorsVolt(double volt)
 {
-    RightMotor1.spin(directionType::fwd, speed, velocityUnits::pct);
-    RightMotor2.spin(directionType::fwd, speed, velocityUnits::pct);
-    RightMotor3.spin(directionType::fwd, speed, velocityUnits::pct);
-    RightMotor4.spin(directionType::fwd, speed, velocityUnits::pct);
+    RightMotor1.spin(fwd, volt, voltageUnits::volt);
+    RightMotor2.spin(fwd, volt, voltageUnits::volt);
+    RightMotor3.spin(fwd, volt, voltageUnits::volt);
+    RightMotor4.spin(fwd, volt, voltageUnits::volt);
 }
 
 void stopAllMotors()
@@ -122,6 +122,56 @@ void recoleccionBajito(int speed, double duration)
     stopRecoleccion();
 }
 
+void moveDistance(double distanceInInches, double maxVolt)
+{
+    resetEncoders();
+    inertialSensor.resetRotation();
+
+    double targetDeg = (distanceInInches / WHEEL_CIRCUMFERENCE) * 360.0;
+    double startAngle = inertialSensor.rotation();
+
+    double kP_dist = 0.015;   // PID distancia
+    double kP_angle = 0.04;   // corrección de rumbo
+
+    while (true)
+    {
+        double leftPos = LeftMotor1.position(deg);
+        double rightPos = RightMotor1.position(deg);
+        double avgPos = (leftPos + rightPos) / 2.0;
+
+        double distError = targetDeg - avgPos;
+
+        if (fabs(distError) < 5) break;
+
+        // --- Control de distancia ---
+        double forwardVolt = kP_dist * distError;
+
+        // Limitar voltaje máximo
+        if (forwardVolt > maxVolt) forwardVolt = maxVolt;
+        if (forwardVolt < -maxVolt) forwardVolt = -maxVolt;
+
+        // --- Corrección de rumbo ---
+        double currentAngle = inertialSensor.rotation();
+        double angleError = currentAngle - startAngle;
+        double turnCorrection = kP_angle * angleError;
+
+        double leftVolt = forwardVolt - turnCorrection;
+        double rightVolt = forwardVolt + turnCorrection;
+
+        // Clamp final
+        leftVolt = std::clamp(leftVolt, -12.0, 12.0);
+        rightVolt = std::clamp(rightVolt, -12.0, 12.0);
+
+        setLeftMotorsVolt(leftVolt);
+        setRightMotorsVolt(rightVolt);
+
+        task::sleep(10);
+    }
+
+    stopAllMotors();
+}
+
+/*
 void moveDistance(double distanceInInches, double speed)
 {
     wait(100, msec); // Espera breve para asegurar que se reinicie
@@ -163,6 +213,7 @@ void moveDistance(double distanceInInches, double speed)
     stopAllMotors();
     wait(100, msec); // Espera breve para asegurar que se reinicie
 }
+*/
 
 void moveDistanceConRecoleccion(double distanceInInches, double speed, int recoSpeed)
 {
