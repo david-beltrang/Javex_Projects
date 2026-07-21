@@ -12,16 +12,14 @@ En la categoría VEX U, el desafío exige un diseño avanzado al coordinar dos r
 
 ## Equipo
 
-Segun `README.md` de esta carpeta:
-
-- Melissa Ruiz Barrera (lider de subsistema)
-- Kenneth Bustamente
-- David Beltran
-- Isabel Gutierrez
-- David Vallejo
+| Persona | Rol |
+|---------|-----|
+| Melissa Ruiz Barrera | Lider subsistema de Programación |
+| Miguel Casallas | Miembro subsistema|
+| David Beltran | Miembro subsistema|
 
 Nota: Todos los commits en el repositorio son de David Beltran. Los
-demas miembros contribuyeron en el diseno de estrategias pero sin
+demas miembros contribuyeron pero sin
 commits propios en este repositorio.
 
 ## Proyectos
@@ -448,13 +446,3 @@ build` segun las dependencias declaradas en `project.pros`. No se
 requiere ningun paso manual adicional.
 
 Instalacion: https://pros.cs.purdue.edu/
-
-## Contributors
-
-Basado en `README.md` de esta carpeta e historial de git.
-
-| Persona | Rol |
-|---------|-----|
-| Melissa Ruiz Barrera | Lider subsistema de Programación |
-| Miguel Casallas | Miembro subsistema|
-| David Beltran | Miembro subsistema|
