@@ -1,23 +1,14 @@
-# Push Back 2025-2026 — VEX V5RC
+# Push Back 2025-2026 — VEX U
 
-Codigo fuente del equipo Javex para la temporada Push Back de VEX V5
-Robotics Competition.
+Código fuente del equipo Javex de la Pontificia Universidad Javeriana para la temporada Push Back de VEX Robotics Competition (categoría VEX U).
 
 ## Sobre la competencia
 
-VEX V5RC Push Back se juega en un campo cuadrado de 12'x12'. El
-objetivo es obtener mayor puntuacion que la alianza rival anotando
-bloques (Blocks) en metas (Goals), controlando zonas (Zones) dentro
-de las metas y estacionando (Park) al final del partido.
+Push Back se desarrolla en un campo cuadrado de 12' × 12', donde el objetivo principal es acumular la mayor cantidad de puntos depositando bloques (*Blocks*) en metas (*Goals*), dominando el control territorial de zonas (*Zones*) estratégicas y estacionando (*Park*) los robots al finalizar el partido. Cada encuentro consta de 30 segundos de período autónomo, seguidos de 1 minuto y 20 segundos de control por el conductor (*driver control*). El campo cuenta con 88 bloques y 4 metas: 2 metas largas (*Long Goals*) y 2 metas centrales (*Center Goals*).
 
-Cada partido consiste en 15 segundos de periodo autonomo seguidos de
-1 minuto con 45 segundos de control manual. Hay 88 bloques en el
-campo y 4 metas: 2 largas (Long Goals, capacidad 15 bloques) y 2
-centrales (Center Goals, capacidad 7 bloques). Cada bloque anotado
-vale 3 puntos. El control de zonas otorga bonificacion: 10 puntos por
-zona controlada en Long Goal, 8 puntos por Center Goal superior y 6
-por Center Goal inferior. Estacionar 1 robot da 8 puntos, 2 robots
-dan 30 puntos.
+En la categoría VEX U, el desafío exige un diseño avanzado al coordinar dos robots con restricciones dimensionales distintas: uno de 15" × 15" × 15" y otro de 24" × 24" × 24". Las principales dificultades técnicas incluyen el desarrollo de mecanismos de admisión (*intake*) de alta capacidad y clasificación rápida de bloques, sistemas de indexado eficientes para alimentar metas de gran capacidad y mecanismos robustos que permitan asegurar el estacionamiento doble simultáneo (*double park*). Desde el punto de vista estratégico y de software, son determinantes una odometría de alta precisión, el uso de visión computacional para el mapeo dinámico de bloques en el campo y la coordinación entre ambos robots durante el período autónomo exclusivo de 30 segundos para asegurar el control de las zonas clave desde el inicio del encuentro.
+
+![Campo de juego de Push Back](images/PushBack_Field.png)
 
 ## Equipo
 
@@ -458,22 +449,12 @@ requiere ningun paso manual adicional.
 
 Instalacion: https://pros.cs.purdue.edu/
 
-## Estado de testing
-
-No hay testing automatizado en ningun proyecto. El codigo se valido
-en robot fisico durante practicas.
-
 ## Contributors
 
 Basado en `README.md` de esta carpeta e historial de git.
 
-| Persona | Rol | Evidencia |
-|---------|-----|-----------|
-| Melissa Ruiz Barrera | Lider de subsistema | README.md |
-| Kenneth Bustamente | Miembro | README.md |
-| David Beltran | Programador, commits | 15/15 commits en el repositorio |
-| Isabel Gutierrez | Miembro | README.md |
-| David Vallejo | Miembro | README.md |
-
-Nota: Solo David Beltran tiene commits en el repositorio. Los demas
-miembros contribuyeron en el diseno de estrategias.
+| Persona | Rol |
+|---------|-----|
+| Melissa Ruiz Barrera | Lider subsistema de Programación |
+| Miguel Casallas | Miembro subsistema|
+| David Beltran | Miembro subsistema|

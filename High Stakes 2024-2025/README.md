@@ -1,22 +1,18 @@
-# High Stakes 2024-2025 — VEX V5RC
+# High Stakes 2024-2025 — VEX U
 
-Código fuente del equipo Javex para la temporada High Stakes de VEX V5
-Robotics Competition.
+Código fuente del equipo Javex de la Pontificia Universidad Javeriana para la temporada High Stakes de VEX Robotics Competition (categoría VEX U).
 
 ## Sobre la competencia
 
-VEX V5RC High Stakes se juega en un campo cuadrado de 12'x12'. El
-objetivo es obtener mayor puntuacion que la alianza rival anotando
-anillos (Rings) en estacas (Stakes), colocando metas moviles (Mobile
-Goals) en esquinas y trepando la escalera (Ladder) al final del
-partido.
+VEX U High Stakes se desarrolla en un campo de 12' × 12', donde el objetivo principal es acumular la mayor cantidad de puntos insertando anillos (Rings) en estacas (Stakes), posicionando metas móviles (Mobile Goals) en las esquinas del campo y realizando la trepa en la estructura central (Ladder). Cada partido consta de 30 segundos de período autónomo, seguidos de 1 minuto y 20 segundos de control por el conductor (driver control). El campo cuenta con 48 anillos y 9 estacas distribuidas entre metas móviles, paredes de alianza, estacas neutrales y la parte superior de la escalera.
 
-Cada partido consiste en 15 segundos de periodo autonomo seguidos de
-1 minuto con 45 segundos de control manual (driver control). Hay
-48 anillos en el campo y 9 estacas: 5 en metas moviles, 4 en estacas
-de pared (2 por alianza + 2 neutrales) y 1 en la cima de la escalera.
-Cada anillo vale 1 punto, el anillo superior de cada estaca vale 3
-puntos. La escalera tiene 3 niveles de escalada (3, 6 y 12 puntos).
+Cada anillo vale 1 punto, mientras que el anillo ubicado en la parte superior de cada estaca otorga 3 puntos. La escalera cuenta con tres niveles de escalada, que otorgan 3, 6 y 12 puntos, respectivamente.
+
+En la categoría VEX U, el desafío exige un alto nivel de ingeniería debido al diseño de dos robots complementarios: uno pequeño de 15" × 15" × 15" y otro grande de 24" × 24" × 24". Las principales dificultades técnicas incluyen la manipulación precisa de piezas cilíndricas, el diseño de sistemas de sujeción rápida (clamps) para las metas móviles, la clasificación en tiempo real de anillos por color y el desarrollo de un mecanismo de elevación rígido para alcanzar el nivel 3 de la escalera. Desde el punto de vista estratégico, es fundamental controlar las zonas de las esquinas positivas y negativas, así como mantener una coordinación fluida entre ambos robots para optimizar los 30 segundos del período autónomo exclusivo de VEX U.
+
+
+![Campo de juego de High Stakes — vista general](images/HighStakes_Field1.png)
+![Campo de juego de High Stakes — detalle](images/HighStakes_Field2.png)
 
 ## Proyectos
 
@@ -154,20 +150,12 @@ Requisitos:
 - VEXcode Pro V5 (recomendado)
 - O ARM GCC toolchain de VEX en PATH
 
-## Estado de testing
-
-No hay testing automatizado. El codigo se valido en robot fisico
-durante practicas.
-
 ## Contributors
 
 Basado en autoria declarada en headers de codigo e historial de git.
 
 | Persona | Rol | Evidencia |
 |---------|-----|-----------|
+| Melissa Ruiz Barrera | Lider subsistema de Programación | -----------|
 | David Beltran Gomez | Programador | Commits en `My_First_Autonomous` y `Autonomo_David` |
 | Kenneth Bustamante | Programador | `Grande_Azul/include/configuration.h` linea 3 |
-
-Nota: Kenneth Bustamante es el autor del proyecto `Grande_Azul`
-(commiteado por David Beltran). David Beltran escribio los otros dos
-proyectos.
