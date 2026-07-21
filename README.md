@@ -47,22 +47,12 @@ VEXcode Pro V5 (mayoría de proyectos) o PROS CLI (proyectos con acceso
 nativo a GPS/IMU). Instrucciones de compilación específicas en cada
 README de temporada.
 
-## Estado de testing
-
-Sin testing automatizado — validación en robot físico durante
-prácticas y competencia, como es estándar en este tipo de desarrollo.
-
 ## Equipo de programación
 
 | Temporada | Programadores |
 |-----------|----------------|
 | High Stakes 2024-2025 | Kenneth Bustamante, Melisa Ruiz Barrera, **David Beltrán Gómez** |
 | Push Back 2025-2026 | Melisa Ruiz, Miguel Casallas, **David Beltrán Gómez** |
-
-Este repositorio contiene el código commiteado por David Beltrán Gómez;
-la autoría individual de cada proyecto (cuando se pudo verificar por
-git log o comentarios en el código) está documentada en el README de
-cada temporada.
 
 ## Autor
 
