@@ -19,7 +19,7 @@ En la categoría VEX U, el desafío exige un alto nivel de ingeniería debido al
 | Proyecto | Archivos fuente | Tamaño | Toolchain | Estado |
 |----------|----------------|--------|-----------|--------|
 | My_First_Autonomous | 1 .cpp + 1 .h | ~6.4 KB | VEXcode | Completo (principiante) |
-| Autonomo_David | 1 .cpp + 1 .h | ~10 KB | VEXcode | En desarrollo |
+| Autonomo_David | 1 .cpp + 1 .h | ~10 KB | VEXcode | Completo |
 | Grande_Azul | 1 .cpp + 4 .h | ~18.7 KB | VEXcode | Completo |
 
 ---
@@ -156,6 +156,6 @@ Basado en autoria declarada en headers de codigo e historial de git.
 
 | Persona | Rol | Evidencia |
 |---------|-----|-----------|
-| Melissa Ruiz Barrera | Lider subsistema de Programación | -----------|
+| Melissa Ruiz Barrera | Lider subsistema de Programación | |
 | David Beltran Gomez | Programador | Commits en `My_First_Autonomous` y `Autonomo_David` |
-| Kenneth Bustamante | Programador | `Grande_Azul/include/configuration.h` linea 3 |
+| Kenneth Bustamante | Programador | `Grande_Azul/include/configuration.h`|
